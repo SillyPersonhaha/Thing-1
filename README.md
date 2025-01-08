@@ -7,4 +7,5 @@ TSB Saitama script that just changes your animations. You gain NO advantages fro
 - Death counter animation and sounds are changed
 
 I MAY add more stuff in the future if I can think of stuff to change. This is a passion project to help me learn roblox scripting for funsies :)
+
 This is also NOT obfuscated so people can learn how to do stuff like I did. (If anyone else finds this)
