@@ -1,5 +1,3 @@
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Mautiku/ehh/main/sussy's%20animation%20logger.txt",true))()
-
 local player = game.Players.LocalPlayer
 
 local playerGui = player.PlayerGui
