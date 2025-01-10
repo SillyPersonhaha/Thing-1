@@ -353,7 +353,7 @@ Anim:AdjustSpeed(0)
 
 Anim.TimePosition = startTime
 
-Anim:AdjustSpeed(1.8)
+Anim:AdjustSpeed(1.85)
 
 local player = game.Players.LocalPlayer
 
@@ -371,7 +371,7 @@ local bodyVeloZ = bodyVelocity.Velocity.Z
 
     if bodyVelocity:IsA("BodyVelocity") then
 
-        while tick() - time <= 1.5 do
+        while tick() - time <= 1 do
 
             task.wait(0.001)
             
@@ -394,6 +394,95 @@ for _, descendant in pairs(character:GetDescendants()) do
     onBodyVelocityAdded(descendant)
 
 end
+
+    end
+
+end
+
+humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+
+local animationId = 12983333733
+
+
+local player = game.Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait()
+
+local humanoid = character:WaitForChild("Humanoid")
+
+
+local function onAnimationPlayed(animationTrack)
+
+    if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationId then
+
+
+local p = game.Players.LocalPlayer
+
+local Humanoid = p.Character:WaitForChild("Humanoid")
+
+
+for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+
+    animTrack:Stop()
+
+end
+
+
+local AnimAnim = Instance.new("Animation")
+
+AnimAnim.AnimationId = "rbxassetid://77727115892579"
+
+local Anim = Humanoid:LoadAnimation(AnimAnim)
+
+
+local startTime = 0
+
+
+Anim:Play()
+
+Anim:AdjustSpeed(0)
+
+Anim.TimePosition = startTime
+
+local soundId = "rbxassetid://95410275491981"
+local soundId2 = "rbxassetid://128136381213631"
+local soundId3 = "rbxassetid://99126314241685"
+local soundId4 = "rbxassetid://118747531933793"
+
+local sound = Instance.new("Sound",game.Workspace)
+local sound2 = Instance.new("Sound",game.Workspace)
+local sound3 = Instance.new("Sound",game.Workspace)
+local sound4 = Instance.new("Sound",game.Workspace)
+
+sound.SoundId = soundId
+sound2.SoundId = soundId2
+sound3.SoundId = soundId3
+sound4.SoundId = soundId4
+
+sound:Play()
+sound2:Play()
+sound3:Play()
+
+sound.Volume = 2
+sound2.Volume = 2
+sound3.Volume = 2
+
+sound3.PlaybackSpeed = 0.93
+
+Anim:AdjustSpeed(0.93)
+
+task.wait(3.75)
+sound2:Destroy()
+task.wait(2.15)
+sound4:Play()
+sound4.Volume = 4
+sound3:Destroy()
+sound.TimePosition = 32.5
+
+task.wait(0.5)
+Anim:AdjustSpeed(0.1)
+task.wait(3.4)
+Anim:Stop()
 
     end
 
