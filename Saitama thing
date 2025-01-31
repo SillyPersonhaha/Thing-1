@@ -307,6 +307,11 @@ tool.Equipped:Connect(function()
     sound3.Volume = 1.25
     sound3:Play()
 
+
+	task.delay(3.1, function() -- Takes the Position & Rotation right before the Teleport
+		originalPosition = humanoidRootPart.Position
+    	originalCFrame = humanoidRootPart.CFrame
+	end)
     -- Delay for animation before teleporting
     task.delay(3.2, function()
         humanoid.WalkSpeed = 0
