@@ -101,6 +101,248 @@ local function findGuiAndSetText()
 
 end
 
+-- Services
+local Players = game:GetService("Players")
+
+-- Creating the tool
+local tool = Instance.new("Tool")
+tool.Name = "Run Tool"
+tool.RequiresHandle = false
+
+-- Adding the tool to the player's backpack
+tool.Parent = Players.LocalPlayer.Backpack
+
+local running = false -- Tracks whether the tool is equipped
+local oneTimeExecuted = false -- Tracks if the one-time action has run
+
+-- Function that runs when the tool is equipped
+tool.Equipped:Connect(function()
+    
+    -- Perform the one-time action
+    if not oneTimeExecuted then
+        oneTimeExecuted = true
+
+        local soundId = "rbxassetid://129080118003311"
+        local sound = Instance.new("Sound",game.Workspace)
+        sound.SoundId = soundId
+        sound:Play()
+
+        local soundId2 = "rbxassetid://17429233290"
+        local sound2 = Instance.new("Sound",game.Workspace)
+        sound2.SoundId = soundId2
+
+		local soundId3 = "rbxassetid://136509670232806"
+        local sound3 = Instance.new("Sound",game.Workspace)
+        sound3.SoundId = soundId3
+
+
+
+
+        print("One-time action executed!")
+
+        local player = game.Players.LocalPlayer
+
+        local character = player.Character or player.CharacterAdded:Wait()
+
+        local p = game.Players.LocalPlayer
+
+        local Humanoid = p.Character:WaitForChild("Humanoid")
+
+        local AnimAnim = Instance.new("Animation")
+		local AnimAnim2 = Instance.new("Animation")
+		local AnimAnim3 = Instance.new("Animation")
+
+		AnimAnim.AnimationId = "rbxassetid://106755459092436"
+        AnimAnim2.AnimationId = "rbxassetid://132259592388175"
+        AnimAnim3.AnimationId = "rbxassetid://95575238948327"
+
+        local Anim = Humanoid:LoadAnimation(AnimAnim)
+        local Anim2 = Humanoid:LoadAnimation(AnimAnim2)
+        local Anim3 = Humanoid:LoadAnimation(AnimAnim3)
+
+		local startTime = 0
+
+
+		Anim:Play()
+		task.wait(Anim.Length)
+        Anim2:Play()
+        sound:Destroy()
+        sound2:Play()
+		sound2.TimePosition = 1.75
+		running = true
+		task.delay(Anim2.Length, function()
+        Anim3:Play()
+		sound3:Play()
+		sound3.Looped = true
+	end)
+		task.delay(0.75, function()
+		sound2:Destroy()
+	end)
+end
+    
+    -- Continuous execution while the tool is equipped
+    while running do
+	task.wait(0.01)
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local speed = 200 -- studs per second
+local duration = 0.01
+
+local elapsedTime = 0
+local RunService = game:GetService("RunService")
+
+local connection
+connection = RunService.Heartbeat:Connect(function(deltaTime)
+    -- Move the HumanoidRootPart forward at a consistent rate
+    local moveDirection = HumanoidRootPart.CFrame.LookVector
+    HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + moveDirection * speed * deltaTime
+    
+    elapsedTime += deltaTime
+    if elapsedTime >= duration then
+        connection:Disconnect() -- Stop after the duration
+    end
+end)
+
+
+    end
+end)
+
+-- Function that runs when the tool is unequipped
+tool.Unequipped:Connect(function()
+
+        sound3 = game.workspace.Sound
+
+		sound3:Destroy()
+
+		
+        local player = game.Players.LocalPlayer
+
+        local character = player.Character or player.CharacterAdded:Wait()
+
+        local p = game.Players.LocalPlayer
+
+        local Humanoid = p.Character:WaitForChild("Humanoid")
+
+		local AnimAnim3 = Instance.new("Animation")
+		AnimAnim3.AnimationId = "rbxassetid://95575238948327"
+		local Anim3 = Humanoid:LoadAnimation(AnimAnim3)
+    	
+		local AnimAnim4 = Instance.new("Animation")
+
+		AnimAnim4.AnimationId = "rbxassetid://102814369422840"
+
+        local Anim4 = Humanoid:LoadAnimation(AnimAnim4)
+
+        for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+
+         animTrack:Stop()
+
+        end
+		running = false
+		oneTimeExecuted = false
+
+        local soundId4 = "rbxassetid://134792238229461"
+        local sound4 = game.workspace.Sound
+        sound4.SoundId = soundId4
+		sound4.Looped = false
+	
+		sound4:Play()
+        Anim4:Play()
+
+    print("Tool unequipped! Continuous actions stopped.")
+
+end)
+
+-- Services
+local Players = game:GetService("Players")
+
+-- Creating the tool
+local tool = Instance.new("Tool")
+tool.Name = "Unlimited Flex Works"
+tool.RequiresHandle = false
+
+-- Adding the tool to the player's backpack
+tool.Parent = Players.LocalPlayer.Backpack
+
+-- Function that runs when the tool is equipped
+tool.Equipped:Connect(function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    -- Preserve original WalkSpeed, JumpPower, and position/rotation
+    local originalWalkSpeed = humanoid.WalkSpeed
+    local originalJumpPower = humanoid.JumpPower
+    local originalPosition = humanoidRootPart.Position
+    local originalCFrame = humanoidRootPart.CFrame
+
+    -- Add a platform to teleport the player
+    local part = Instance.new("Part", workspace)
+    part.Position = Vector3.new(-10000, -5, -10000)
+    part.Anchored = true
+    part.Size = Vector3.new(10, 1, 10)
+
+    -- Play animation
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://77727115892579"
+    local loadedAnim = humanoid:LoadAnimation(anim)
+    loadedAnim:Play()
+
+    -- Sounds
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://95410275491981"
+    sound.Volume = 1.5
+    sound:Play()
+
+    local sound2 = Instance.new("Sound", workspace)
+    sound2.SoundId = "rbxassetid://128136381213631"
+    sound2.Volume = 1.5
+    sound2:Play()
+
+    local sound3 = Instance.new("Sound", workspace)
+    sound3.SoundId = "rbxassetid://99126314241685"
+    sound3.Volume = 1.25
+    sound3:Play()
+
+    -- Delay for animation before teleporting
+    task.delay(3.2, function()
+        humanoid.WalkSpeed = 0
+        humanoid.JumpPower = 0
+
+        -- Teleport and rotate player
+        humanoidRootPart.CFrame = CFrame.new(-10000, 0, -10000)
+    end)
+
+    -- Lock WalkSpeed and JumpPower during duration
+    local duration = 25.8 - 2.85
+    local startTime = tick()
+    while tick() - startTime < duration do
+        humanoid.WalkSpeed = 0
+        humanoid.JumpPower = 0
+        task.wait(0.01)
+    end
+
+    -- Sounds for end sequence
+
+    -- After the duration ends, restore WalkSpeed/JumpPower
+	humanoidRootPart.CFrame = originalCFrame
+
+	task.wait(2.85)
+
+    local sound4 = Instance.new("Sound", workspace)
+    sound4.SoundId = "rbxassetid://118747531933793"
+    sound4.Volume = 2.5
+    sound4:Play()
+    humanoid.WalkSpeed = originalWalkSpeed
+    humanoid.JumpPower = originalJumpPower
+
+    -- Cleanup
+    part:Destroy()
+end)
+
 
 playerGui.DescendantAdded:Connect(findGuiAndSetText)
 
@@ -182,7 +424,9 @@ Anim:AdjustSpeed(1.15)
 
 task.wait(7)
 sound2.TimePosition = 11.75
-task.wait(1.35)
+task.wait(0.5)
+sound3:Stop()
+task.wait(0.85)
 Anim.TimePosition = 25.75
 Anim:AdjustSpeed(1.5)
 
@@ -489,6 +733,62 @@ Anim:Stop()
 end
 
 humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+
+local animationId = 12447707844
+
+
+local player = game.Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait()
+
+local humanoid = character:WaitForChild("Humanoid")
+
+
+local function onAnimationPlayed(animationTrack)
+
+    if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationId then
+
+
+local p = game.Players.LocalPlayer
+
+local Humanoid = p.Character:WaitForChild("Humanoid")
+
+
+for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+
+    animTrack:Stop()
+
+end
+
+
+local AnimAnim = Instance.new("Animation")
+
+AnimAnim.AnimationId = "rbxassetid://106755459092436"
+
+local Anim = Humanoid:LoadAnimation(AnimAnim)
+
+
+local startTime = 0
+
+
+Anim:Play()
+
+Anim:AdjustSpeed(0)
+
+Anim.TimePosition = startTime
+
+Anim:AdjustSpeed(1)
+
+task.wait(1.1)
+
+Anim:Stop()
+
+    end
+
+end
+
+humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+
 
 local Players = game:GetService("Players")
 
