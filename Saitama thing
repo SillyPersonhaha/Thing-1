@@ -133,6 +133,7 @@ tool.Equipped:Connect(function()
 
 		local soundId3 = "rbxassetid://136509670232806"
         local sound3 = Instance.new("Sound",game.Workspace)
+		sound3.Name = "Run"
         sound3.SoundId = soundId3
 
 
@@ -212,9 +213,7 @@ end)
 -- Function that runs when the tool is unequipped
 tool.Unequipped:Connect(function()
 
-        sound3 = game.workspace.Sound
-
-		sound3:Destroy()
+		game.workspace.Sound.Run:Destroy()
 
 		
         local player = game.Players.LocalPlayer
@@ -243,6 +242,7 @@ tool.Unequipped:Connect(function()
 		running = false
 		oneTimeExecuted = false
 
+		game.workspace.Run:Destroy()
         local soundId4 = "rbxassetid://134792238229461"
         local sound4 = game.workspace.Sound
         sound4.SoundId = soundId4
@@ -262,6 +262,8 @@ local Players = game:GetService("Players")
 local tool = Instance.new("Tool")
 tool.Name = "Unlimited Flex Works"
 tool.RequiresHandle = false
+tool:SetAttribute("Skill", true)
+tool:SetAttribute("KJUlt", true)
 
 -- Adding the tool to the player's backpack
 tool.Parent = Players.LocalPlayer.Backpack
@@ -281,9 +283,10 @@ tool.Equipped:Connect(function()
 
     -- Add a platform to teleport the player
     local part = Instance.new("Part", workspace)
-    part.Position = Vector3.new(-10000, -5, -10000)
+    part.Position = Vector3.new(-1000, -5, -1000)
     part.Anchored = true
     part.Size = Vector3.new(10, 1, 10)
+	part.Transparency = 1
 
     -- Play animation
     local anim = Instance.new("Animation")
@@ -307,9 +310,16 @@ tool.Equipped:Connect(function()
     sound3.Volume = 1.25
     sound3:Play()
 
+local Back = game.ReplicatedStorage.Resources.UFW.BG
+local BackC = Back:Clone()
+BackC.Parent = workspace
 
-	task.delay(3.1, function() -- Takes the Position & Rotation right before the Teleport
-		originalPosition = humanoidRootPart.Position
+BackC:MoveTo(Vector3.new(-1000, 0, -1000))
+BackC:SetPrimaryPartCFrame(CFrame.new(-1000, 0, -1000))
+BackC.Floor2.CanCollide = true
+
+	task.delay(3.1, function()
+    	originalPosition = humanoidRootPart.Position
     	originalCFrame = humanoidRootPart.CFrame
 	end)
     -- Delay for animation before teleporting
@@ -318,7 +328,7 @@ tool.Equipped:Connect(function()
         humanoid.JumpPower = 0
 
         -- Teleport and rotate player
-        humanoidRootPart.CFrame = CFrame.new(-10000, 0, -10000)
+        humanoidRootPart.CFrame = CFrame.new(-1000, 0, -1000)
     end)
 
     -- Lock WalkSpeed and JumpPower during duration
@@ -343,9 +353,14 @@ tool.Equipped:Connect(function()
     sound4:Play()
     humanoid.WalkSpeed = originalWalkSpeed
     humanoid.JumpPower = originalJumpPower
-
+	BackC:Destroy()
     -- Cleanup
+	task.wait(17.5)
     part:Destroy()
+	sound:Destroy()
+	sound2:Destroy()
+	sound3:Destroy()
+	sound4:Destroy()
 end)
 
 
@@ -768,7 +783,7 @@ end
 
 local AnimAnim = Instance.new("Animation")
 
-AnimAnim.AnimationId = "rbxassetid://106755459092436"
+AnimAnim.AnimationId = "rbxassetid://78521642007560"
 
 local Anim = Humanoid:LoadAnimation(AnimAnim)
 
@@ -782,11 +797,16 @@ Anim:AdjustSpeed(0)
 
 Anim.TimePosition = startTime
 
+local soundId = "rbxassetid://72864971245980"
+local sound = Instance.new("Sound",game.Workspace)
+sound.SoundId = soundId
+
+task.delay(0.3, function()
+	sound:Play()
+end)
+Anim:AdjustSpeed(0.5)
+task.wait(0.7)
 Anim:AdjustSpeed(1)
-
-task.wait(1.1)
-
-Anim:Stop()
 
     end
 
