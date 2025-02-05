@@ -337,7 +337,7 @@ local function cinematicZoomEffect()
     -- Define positions for the sequence
     local headPosition = head.Position
     local lookVector = head.CFrame.LookVector
-    local offsetHeight = 0 -- Keep the camera at head height
+    local offsetHeight = -0.1 -- Keep the camera at head height
     local closeDistance = 3 -- Start 3 studs in front of the player
     local farDistance = 15 -- Move 15 studs away
 
