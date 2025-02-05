@@ -173,11 +173,10 @@ tool.Equipped:Connect(function()
 		running = true
 		task.delay(Anim2.Length, function()
         Anim3:Play()
-		sound3:Play()
-		sound3.Looped = true
 	end)
 		task.delay(0.75, function()
 		sound2:Destroy()
+		sound3:Play()
 	end)
 end
     
@@ -213,7 +212,7 @@ end)
 -- Function that runs when the tool is unequipped
 tool.Unequipped:Connect(function()
 
-		game.workspace.Sound.Run:Destroy()
+		sound3 = game.workspace.Run
 
 		
         local player = game.Players.LocalPlayer
@@ -242,9 +241,9 @@ tool.Unequipped:Connect(function()
 		running = false
 		oneTimeExecuted = false
 
-		game.workspace.Run:Destroy()
+		sound3 = game.workspace.Sound
         local soundId4 = "rbxassetid://134792238229461"
-        local sound4 = game.workspace.Sound
+        local sound4 = Instance.new("Sound", game.workspace)
         sound4.SoundId = soundId4
 		sound4.Looped = false
 	
@@ -274,10 +273,20 @@ tool.Equipped:Connect(function()
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+	local talk = false
+	
+	if talk == true then
+    -- Chat messages
+    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Because...", "All")
+    task.delay(1.4, function()
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("With this,", "All")
+    end)
+    task.delay(2.3, function()
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("IT'S OVER!", "All")
+    end)
+end
 
     -- Preserve original WalkSpeed, JumpPower, and position/rotation
-    local originalWalkSpeed = humanoid.WalkSpeed
-    local originalJumpPower = humanoid.JumpPower
     local originalPosition = humanoidRootPart.Position
     local originalCFrame = humanoidRootPart.CFrame
 
@@ -286,13 +295,117 @@ tool.Equipped:Connect(function()
     part.Position = Vector3.new(-1000, -5, -1000)
     part.Anchored = true
     part.Size = Vector3.new(10, 1, 10)
-	part.Transparency = 1
+    part.Transparency = 1
+
+    local player = game.Players.LocalPlayer
+
+    local character = player.Character or player.CharacterAdded:Wait()
+
+    local p = game.Players.LocalPlayer
+
+    local humanoid = p.Character:WaitForChild("Humanoid")
+
+	-- Add the Accoutrement to the player's character
+    local thing = Instance.new("Accoutrement")
+    thing.Name = "Freeze"
+    thing.Parent = character -- Attach to the player's character
 
     -- Play animation
-    local anim = Instance.new("Animation")
-    anim.AnimationId = "rbxassetid://77727115892579"
-    local loadedAnim = humanoid:LoadAnimation(anim)
-    loadedAnim:Play()
+	local AnimAnim = Instance.new("Animation")
+	AnimAnim.AnimationId = "rbxassetid://77727115892579"
+	local Anim = humanoid:LoadAnimation(AnimAnim)
+    Anim:Play()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local head = character:WaitForChild("Head") -- Target the player's head
+
+-- Easing function for smoother motion (ease in and out)
+local function easeInOutQuad(t)
+    return t < 0.5 and 2 * t * t or 1 - (-2 * t + 2)^2 / 2
+end
+
+-- Function to smoothly move the camera and adjust FOV
+local function cinematicZoomEffect()
+    -- Set the camera to Scriptable mode for manual control
+    Camera.CameraType = Enum.CameraType.Scriptable
+
+    -- Define positions for the sequence
+    local headPosition = head.Position
+    local lookVector = head.CFrame.LookVector
+    local offsetHeight = 0 -- Keep the camera at head height
+    local closeDistance = 3 -- Start 3 studs in front of the player
+    local farDistance = 15 -- Move 15 studs away
+
+    -- Define camera positions (Add LookVector to position the camera in front)
+    local closePosition = headPosition + (lookVector * closeDistance) + Vector3.new(0, offsetHeight, 0)
+    local farPosition = headPosition + (lookVector * farDistance) + Vector3.new(0, offsetHeight, 0)
+    local finalPosition = headPosition + (lookVector * 5) + Vector3.new(0, offsetHeight, 0) -- End 5 studs in front
+
+    -- Define FOV values for the sequence
+    local closeFOV = 40 -- Tight zoom
+    local farFOV = 60 -- Wide zoom
+    local finalFOV = 90 -- Return to default zoom
+
+    -- Timing for each phase
+    local zoomOutDuration = 0.5 -- Time to zoom out
+    local pauseDuration = 0.01 -- Pause at the far position
+    local zoomInDuration = 2.5 -- Time to zoom back in
+
+    -- Function to interpolate between two values with easing
+    local function interpolate(startValue, endValue, alpha)
+        return startValue + (endValue - startValue) * easeInOutQuad(alpha)
+    end
+
+    -- Animate the camera
+    local function animateCamera(startPosition, endPosition, startFOV, endFOV, duration, onComplete)
+        local startTime = tick()
+        local connection
+
+        connection = RunService.RenderStepped:Connect(function()
+            local elapsed = tick() - startTime
+            local alpha = math.min(elapsed / duration, 1) -- Progress from 0 to 1
+
+            -- Easing interpolation for position and FOV
+            local currentPosition = startPosition:Lerp(endPosition, easeInOutQuad(alpha))
+            local currentFOV = interpolate(startFOV, endFOV, alpha)
+
+            -- Update the camera's position and FOV
+            Camera.CFrame = CFrame.new(currentPosition, headPosition) -- Look at the head
+            Camera.FieldOfView = currentFOV
+
+            if alpha == 1 then
+                -- Animation complete
+                connection:Disconnect()
+                if onComplete then
+                    onComplete()
+                end
+            end
+        end)
+    end
+
+    -- Sequence: Zoom out, pause, then zoom back in
+    animateCamera(closePosition, farPosition, closeFOV, farFOV, zoomOutDuration, function()
+        -- Pause at the far position
+        task.delay(pauseDuration, function()
+            -- Zoom back in
+            animateCamera(farPosition, finalPosition, farFOV, finalFOV, zoomInDuration, function()
+                -- Reset camera to default
+                task.delay(0.2, function()
+                    Camera.CameraType = Enum.CameraType.Custom
+                    Camera.FieldOfView = 70 -- Default FOV
+                end)
+            end)
+        end)
+    end)
+end
+
+-- Trigger the cinematic zoom effect
+cinematicZoomEffect()
 
     -- Sounds
     local sound = Instance.new("Sound", workspace)
@@ -310,64 +423,60 @@ tool.Equipped:Connect(function()
     sound3.Volume = 1.25
     sound3:Play()
 
-local Back = game.ReplicatedStorage.Resources.UFW.BG
-local BackC = Back:Clone()
-BackC.Parent = workspace
+    -- Background setup
+    local Back = game.ReplicatedStorage.Resources.UFW.BG
+    local BackC = Back:Clone()
+    BackC.Parent = workspace
+    BackC:MoveTo(Vector3.new(-1000, 0, -1000))
+    BackC:SetPrimaryPartCFrame(CFrame.new(-1000, 0, -1000))
+    BackC.Floor2.CanCollide = true
 
-BackC:MoveTo(Vector3.new(-1000, 0, -1000))
-BackC:SetPrimaryPartCFrame(CFrame.new(-1000, 0, -1000))
-BackC.Floor2.CanCollide = true
-
-	task.delay(3.1, function()
-    	originalPosition = humanoidRootPart.Position
-    	originalCFrame = humanoidRootPart.CFrame
-	end)
-    -- Delay for animation before teleporting
-    task.delay(3.2, function()
-        humanoid.WalkSpeed = 0
-        humanoid.JumpPower = 0
-
-        -- Teleport and rotate player
-        humanoidRootPart.CFrame = CFrame.new(-1000, 0, -1000)
+    -- Animation sequence and teleport
+    task.delay(3.1, function()
+        originalPosition = humanoidRootPart.Position
+        originalCFrame = humanoidRootPart.CFrame
     end)
+task.delay(3.2, function()
+    humanoidRootPart.CFrame = CFrame.new(Vector3.new(-1000, 0, -1000)) -- Move to specific position
+    humanoidRootPart.CFrame = CFrame.new(Vector3.new(-1000, 0, -1000)) * CFrame.Angles(0, math.rad(90), 0) -- Rotate it
+end)
+
+
+
 
     -- Lock WalkSpeed and JumpPower during duration
     local duration = 25.8 - 2.85
     local startTime = tick()
     while tick() - startTime < duration do
-        humanoid.WalkSpeed = 0
-        humanoid.JumpPower = 0
         task.wait(0.01)
     end
 
-    -- Sounds for end sequence
-
-    -- After the duration ends, restore WalkSpeed/JumpPower
-	humanoidRootPart.CFrame = originalCFrame
-
-	task.wait(2.85)
+    -- Cleanup and restore player
+    humanoidRootPart.CFrame = originalCFrame
+    task.wait(2.85)
 
     local sound4 = Instance.new("Sound", workspace)
     sound4.SoundId = "rbxassetid://118747531933793"
     sound4.Volume = 2.5
     sound4:Play()
+
+    thing:Destroy()
     humanoid.WalkSpeed = originalWalkSpeed
     humanoid.JumpPower = originalJumpPower
-	BackC:Destroy()
-    -- Cleanup
-	task.wait(17.5)
-    part:Destroy()
-	sound:Destroy()
-	sound2:Destroy()
-	sound3:Destroy()
-	sound4:Destroy()
-end)
+    BackC:Destroy()
 
+    -- Final cleanup
+    task.wait(17.5)
+    part:Destroy()
+    sound:Destroy()
+    sound2:Destroy()
+    sound3:Destroy()
+    sound4:Destroy()
+end)
 
 playerGui.DescendantAdded:Connect(findGuiAndSetText)
 
 findGuiAndSetText()
-
 
 local animationId = 11343318134
 
@@ -462,7 +571,6 @@ sound2:Destroy()
 end
 
 humanoid.AnimationPlayed:Connect(onAnimationPlayed)
-
 
 local animationId = 10471336737
 
