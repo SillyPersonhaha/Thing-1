@@ -1,5 +1,3 @@
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Mautiku/ehh/main/sussy's%20animation%20logger.txt",true))()
-
 local player = game.Players.LocalPlayer
 
 local playerGui = player.PlayerGui
@@ -106,6 +104,14 @@ end
 -- Services
 local Players = game:GetService("Players")
 
+local player = game.Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait()
+
+local p = game.Players.LocalPlayer
+
+local Humanoid = p.Character:WaitForChild("Humanoid")
+
 -- Creating the tool
 local tool = Instance.new("Tool")
 tool.Name = "Run Tool"
@@ -125,27 +131,19 @@ tool.Equipped:Connect(function()
         oneTimeExecuted = true
 
         local soundId = "rbxassetid://129080118003311"
-        local sound = Instance.new("Sound",game.Workspace)
+        local sound = Instance.new("Sound", game.workspace)
         sound.SoundId = soundId
         sound:Play()
 
         local soundId2 = "rbxassetid://17429233290"
-        local sound2 = Instance.new("Sound",game.Workspace)
+        local sound2 = Instance.new("Sound", game.workspace)
         sound2.SoundId = soundId2
 
 		local soundId3 = "rbxassetid://136509670232806"
-        local sound3 = Instance.new("Sound",game.Workspace)
+        local sound3 = Instance.new("Sound", game.workspace)
 		sound3.Name = "Run"
 		sound3.Looped = true
         sound3.SoundId = soundId3
-
-        local player = game.Players.LocalPlayer
-
-        local character = player.Character or player.CharacterAdded:Wait()
-
-        local p = game.Players.LocalPlayer
-
-        local Humanoid = p.Character:WaitForChild("Humanoid")
 
 		local Accou = Instance.new("Accoutrement")
 
@@ -217,13 +215,13 @@ end)
 -- Function that runs when the tool is unequipped
 tool.Unequipped:Connect(function()
 
-		sound3 = workspace:WaitForChild("Run")
-
-		sound3:Destroy()
-		
         local player = game.Players.LocalPlayer
 
         local character = player.Character or player.CharacterAdded:Wait()
+
+		sound3 = workspace:WaitForChild("Run")
+
+		sound3:Destroy()
 
 		Accou = character:WaitForChild("Freeze")
 
@@ -358,7 +356,7 @@ local function cinematicZoomEffect()
     -- Define positions for the sequence
     local headPosition = head.Position
     local lookVector = head.CFrame.LookVector
-    local offsetHeight = -0.5 -- Keep the camera at head height
+    local offsetHeight = -0.1 -- Keep the camera at head height
     local closeDistance = 3 -- Start 3 studs in front of the player
     local farDistance = 15 -- Move 15 studs away
 
@@ -418,7 +416,6 @@ local function cinematicZoomEffect()
                 -- Reset camera to default
                 task.delay(0.2, function()
                     Camera.CameraType = Enum.CameraType.Custom
-                    Camera.FieldOfView = 70 -- Default FOV
                 end)
             end)
         end)
@@ -586,7 +583,6 @@ local function onAnimationPlayed(animationTrack)
         sound4.SoundId = soundId4
 
         sound:Play()
-        sound2:Play()
 
         sound.Volume = 2
         sound.TimePosition = 17.4
@@ -613,9 +609,11 @@ local function onAnimationPlayed(animationTrack)
         -- 🔹 Smooth transition from Anim2 to Anim3
         tweenAnimationWeight(Anim2, Anim3, 0.1) -- Smoothly blend Anim2 out while blending Anim3 in
 
-        task.wait(7)
+        task.wait(15)
         sound2:Destroy()
         sound4:Destroy()
+		sound3:Destroy()
+		sound:Destroy()
     end
 end
 
@@ -890,7 +888,7 @@ local function cinematicZoomEffect()
     -- Define positions for the sequence
     local headPosition = head.Position
     local lookVector = head.CFrame.LookVector
-    local offsetHeight = -0.5 -- Keep the camera at head height
+    local offsetHeight = -0.1 -- Keep the camera at head height
     local closeDistance = 3 -- Start 3 studs in front of the player
     local farDistance = 15 -- Move 15 studs away
 
