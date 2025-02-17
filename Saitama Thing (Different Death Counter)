@@ -212,58 +212,63 @@ end)
     end
 end)
 
--- Function that runs when the tool is unequipped
 tool.Unequipped:Connect(function()
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-        local player = game.Players.LocalPlayer
+    sound3 = workspace:FindFirstChild("Run")
+    if sound3 then
+        sound3:Destroy()
+    end
 
-        local character = player.Character or player.CharacterAdded:Wait()
+    Accou = character:FindFirstChild("Freeze")
+    
+    local Humanoid = character:FindFirstChild("Humanoid")
+    
+    local AnimAnim3 = Instance.new("Animation")
+    AnimAnim3.AnimationId = "rbxassetid://95575238948327"
+    local Anim3 = Humanoid:LoadAnimation(AnimAnim3)
+    
+    local AnimAnim4 = Instance.new("Animation")
+    AnimAnim4.AnimationId = "rbxassetid://102814369422840"
+    local Anim4 = Humanoid:LoadAnimation(AnimAnim4)
 
-		sound3 = workspace:WaitForChild("Run")
+    -- Stop all animations
+    for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+        animTrack:Stop()
+    end
 
-		sound3:Destroy()
+    running = false
+    oneTimeExecuted = false
 
-		Accou = character:WaitForChild("Freeze")
+    local soundId4 = "rbxassetid://134792238229461"
+    local sound4 = Instance.new("Sound", game.workspace)
+    sound4.SoundId = soundId4
+    sound4.Looped = false
+    sound4:Play()
+    
+    Anim4:Play()
 
-        local p = game.Players.LocalPlayer
+    -- **Smoothly decrease speed to 0**
+    local speed = 225
+    while speed > 0 do
+        speed = speed - 4.5 -- Reduce speed gradually
+        HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + HumanoidRootPart.CFrame.LookVector * speed * 0.01
+        task.wait(0.001) -- Adjust wait time for a smooth effect
+    end
 
-        local Humanoid = p.Character:WaitForChild("Humanoid")
+    task.delay(0.1, function()
+        if Accou then Accou:Destroy() end
+    end)
 
-		local AnimAnim3 = Instance.new("Animation")
-		AnimAnim3.AnimationId = "rbxassetid://95575238948327"
-		local Anim3 = Humanoid:LoadAnimation(AnimAnim3)
-    	
-		local AnimAnim4 = Instance.new("Animation")
-
-		AnimAnim4.AnimationId = "rbxassetid://102814369422840"
-
-        local Anim4 = Humanoid:LoadAnimation(AnimAnim4)
-
-        for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
-
-         animTrack:Stop()
-
-        end
-		running = false
-		oneTimeExecuted = false
-
-        local soundId4 = "rbxassetid://134792238229461"
-        local sound4 = Instance.new("Sound", game.workspace)
-        sound4.SoundId = soundId4
-		sound4.Looped = false
-	
-		sound4:Play()
-        Anim4:Play()
-
-		task.delay(1, function()
-			Accou:Destroy()
-		end)
-
-		task.delay(3.5, function()
-			sound4:Destroy()
-		end)
-
+    task.delay(3.5, function()
+        sound4:Destroy()
+    end)
 end)
+
+local ye = true
+
 
 -- Services
 local Players = game:GetService("Players")
@@ -338,6 +343,7 @@ end
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
+ye = false
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -485,6 +491,7 @@ end)
     sound4.SoundId = "rbxassetid://118747531933793"
     sound4.Volume = 2.5
     sound4:Play()
+	ye = true
 
     thing:Destroy()
 	thing2:Destroy()
@@ -866,6 +873,7 @@ Anim:Play()
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
+ye = false
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -1008,6 +1016,7 @@ sound4:Play()
 sound4.Volume = 4
 sound3:Destroy()
 sound.TimePosition = 32.5
+ye = true
 
 task.wait(0.5)
 Anim:AdjustSpeed(0.1)
@@ -1226,5 +1235,13 @@ local function onAnimationPlayed(animationTrack)
         end
 
     end
+
+local Camera = workspace.CurrentCamera
+local FOV = 90
+
+while ye == true do
+	Camera.FieldOfView = FOV
+	task.wait(0.01)
+end
 
 end
