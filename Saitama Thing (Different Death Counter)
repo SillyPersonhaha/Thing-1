@@ -267,7 +267,7 @@ tool.Unequipped:Connect(function()
     end)
 end)
 
-local ye = true
+local FO = true
 
 
 -- Services
@@ -343,7 +343,6 @@ end
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
-ye = false
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -390,6 +389,7 @@ local function cinematicZoomEffect()
     local function animateCamera(startPosition, endPosition, startFOV, endFOV, duration, onComplete)
         local startTime = tick()
         local connection
+        FO = false
 
         connection = RunService.RenderStepped:Connect(function()
             local elapsed = tick() - startTime
@@ -473,10 +473,6 @@ task.delay(5, function()
 	BackC.Wall2.Transparency = 0.8
 end)
 
-
-
-
-    -- Lock WalkSpeed and JumpPower during duration
     local duration = 25.8 - 2.85
     local startTime = tick()
     while tick() - startTime < duration do
@@ -491,13 +487,11 @@ end)
     sound4.SoundId = "rbxassetid://118747531933793"
     sound4.Volume = 2.5
     sound4:Play()
-	ye = true
+    FO = true
 
     thing:Destroy()
 	thing2:Destroy()
 	thing3:Destroy()
-    humanoid.WalkSpeed = originalWalkSpeed
-    humanoid.JumpPower = originalJumpPower
     BackC:Destroy()
 
     -- Final cleanup
@@ -724,6 +718,12 @@ local startTime = 0
 
 Anim:Play()
 
+local snd = Instance.new("Sound", game.workspace)
+local sndId = "rbxassetid://16945495411"
+snd.SoundId = sndId
+
+snd:Play()
+
 Anim:AdjustSpeed(0)
 
 Anim.TimePosition = startTime
@@ -733,6 +733,10 @@ Anim:AdjustSpeed(0.7)
 task.wait(0.3)
 
 Anim:AdjustSpeed(1)
+
+task.wait(2)
+
+snd:Destroy()
 
     end
 
@@ -873,7 +877,6 @@ Anim:Play()
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
-ye = false
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -924,6 +927,7 @@ local function cinematicZoomEffect()
     local function animateCamera(startPosition, endPosition, startFOV, endFOV, duration, onComplete)
         local startTime = tick()
         local connection
+        FO = false
 
         connection = RunService.RenderStepped:Connect(function()
             local elapsed = tick() - startTime
@@ -966,9 +970,21 @@ end
 cinematicZoomEffect()
 
 	local talk = true
+    local c1 = math.random(1,100)
 	
 	if talk == true then
-    -- Chat messages
+        if c1 < 90 then
+
+    local soundId = "rbxassetid://128136381213631"
+    local sound = Instance.new("Sound",game.Workspace)
+    sound.SoundId = soundId
+    sound.Volume = 2
+    sound:Play()
+    
+    task.delay(3.75, function()
+        sound:Destroy()
+    end)
+
     game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Because...", "All")
     task.delay(1.4, function()
         game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("With this,", "All")
@@ -976,32 +992,36 @@ cinematicZoomEffect()
     task.delay(2.3, function()
         game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("IT'S OVER!", "All")
     end)
+    elseif c1 > 90 then
+        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Because...", "All")
+        task.delay(1.4, function()
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("With this,", "All")
+        end)
+        task.delay(2.3, function()
+            game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("the conclusion draws near!", "All")
+        end)
+    end
 end
 
 Anim:AdjustSpeed(0)
 
 Anim.TimePosition = startTime
 
-local soundId = "rbxassetid://95410275491981"
-local soundId2 = "rbxassetid://128136381213631"
+local soundId2 = "rbxassetid://95410275491981"
 local soundId3 = "rbxassetid://99126314241685"
 local soundId4 = "rbxassetid://118747531933793"
 
-local sound = Instance.new("Sound",game.Workspace)
 local sound2 = Instance.new("Sound",game.Workspace)
 local sound3 = Instance.new("Sound",game.Workspace)
 local sound4 = Instance.new("Sound",game.Workspace)
 
-sound.SoundId = soundId
 sound2.SoundId = soundId2
 sound3.SoundId = soundId3
 sound4.SoundId = soundId4
 
-sound:Play()
 sound2:Play()
 sound3:Play()
 
-sound.Volume = 2
 sound2.Volume = 2
 sound3.Volume = 2
 
@@ -1010,20 +1030,19 @@ sound3.PlaybackSpeed = 0.93
 Anim:AdjustSpeed(0.93)
 
 task.wait(3.75)
-sound2:Destroy()
 task.wait(2.15)
+sound2.TimePosition = 32.5
 sound4:Play()
 sound4.Volume = 4
 sound3:Destroy()
-sound.TimePosition = 32.5
-ye = true
+FO = true
 
 task.wait(0.5)
 Anim:AdjustSpeed(0.1)
 task.wait(3.4)
 Anim:Stop()
 task.wait(7.5)
-	sound:Destroy()
+
 	sound2:Destroy()
 	sound3:Destroy()
 	sound4:Destroy()
@@ -1092,6 +1111,124 @@ end)
 Anim:AdjustSpeed(0.5)
 task.wait(0.7)
 Anim:AdjustSpeed(1)
+
+    end
+
+end
+
+humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+
+local animationId = 11365563255
+
+
+local player = game.Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait()
+
+local humanoid = character:WaitForChild("Humanoid")
+
+
+local function onAnimationPlayed(animationTrack)
+
+    if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationId then
+
+
+local p = game.Players.LocalPlayer
+
+local Humanoid = p.Character:WaitForChild("Humanoid")
+
+
+for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+
+    animTrack:Stop()
+
+end
+
+
+local AnimAnim = Instance.new("Animation")
+
+AnimAnim.AnimationId = "rbxassetid://16737255386"
+
+local Anim = Humanoid:LoadAnimation(AnimAnim)
+
+
+local startTime = 0
+
+
+Anim:Play()
+
+Anim:AdjustSpeed(0)
+
+Anim.TimePosition = startTime
+
+local soundId = "rbxassetid://17149593018"
+local sound = Instance.new("Sound",game.Workspace)
+sound.SoundId = soundId
+
+local soundId2 = "rbxassetid://17141392676"
+local sound2 = Instance.new("Sound",game.Workspace)
+sound2.SoundId = soundId2
+
+task.delay(1.5, function()
+	sound:Destroy()
+end)
+
+task.delay(0.3, function()
+	sound:Play()
+end)
+Anim:AdjustSpeed(2)
+
+local AnimAnim2 = Instance.new("Animation")
+
+AnimAnim2.AnimationId = "rbxassetid://16524243757"
+
+local Anim2 = Humanoid:LoadAnimation(AnimAnim2)
+
+local TweenService = game:GetService("TweenService")
+local ogG = workspace.Gravity
+local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local ogPos = HumanoidRootPart.Position -- Save original position
+local ogCFrame = HumanoidRootPart.CFrame -- Save original CFrame (position & rotation)
+
+print("Original Y Position:", ogPos.Y)
+
+task.delay(0.3, function()
+    Anim:Stop()
+    Anim2:Play()
+    workspace.Gravity = 0 
+
+    -- Tween to move UP (preserving rotation)
+    local targetCFrame = ogCFrame + Vector3.new(0, 2500, 0) -- Move up without changing rotation
+    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local upTween = TweenService:Create(HumanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+
+    -- Play UP tween
+    upTween:Play()
+    upTween.Completed:Wait()
+
+    task.wait(0.01) -- Small pause at the peak
+
+	task.delay(2.7, function()
+		sound2:Play()
+		game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Stoic Bomb.", "All")
+	end)
+
+    -- Tween to move DOWN (preserving rotation)
+    local downTweenInfo = TweenInfo.new(4.7, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+    local downTween = TweenService:Create(HumanoidRootPart, downTweenInfo, {CFrame = ogCFrame}) -- Restore original rotation
+
+    -- Play DOWN tween
+    downTween:Play()
+    downTween.Completed:Wait()
+
+    -- Restore Gravity
+    workspace.Gravity = ogG
+	sound2:Destroy()
+	task.wait(0.5)
+	Anim2:Stop()
+end)
+
+
 
     end
 
@@ -1236,12 +1373,13 @@ local function onAnimationPlayed(animationTrack)
 
     end
 
-local Camera = workspace.CurrentCamera
-local FOV = 90
+    local Camera = workspace.CurrentCamera
 
-while ye == true do
-	Camera.FieldOfView = FOV
-	task.wait(0.01)
-end
+    while FO == true do
+        Camera.FieldOfView = 90
+		print(FO)
+		FO = false
+		task.wait(0.01)
+    end
 
 end
