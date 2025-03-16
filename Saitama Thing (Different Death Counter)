@@ -103,405 +103,342 @@ end
 
 -- Services
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
-local player = game.Players.LocalPlayer
-
+-- Player Setup
+local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
+local Humanoid = character:WaitForChild("Humanoid")
+local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-local p = game.Players.LocalPlayer
-
-local Humanoid = p.Character:WaitForChild("Humanoid")
-
--- Creating the tool
+-- Tool Setup
 local tool = Instance.new("Tool")
 tool.Name = "Run Tool"
 tool.RequiresHandle = false
+tool.Parent = player.Backpack
 
--- Adding the tool to the player's backpack
-tool.Parent = Players.LocalPlayer.Backpack
+-- Variables
+local running = false
+local oneTimeExecuted = false
+local connection
+local currentSpeed = 0
+local targetSpeed = 275
+local acceleration = 275
+local deceleration = 10
 
-local running = false -- Tracks whether the tool is equipped
-local oneTimeExecuted = false -- Tracks if the one-time action has run
+-- Animations (preloading)
+local AnimAnim = Instance.new("Animation")
+AnimAnim.AnimationId = "rbxassetid://106755459092436" -- First Animation (Startup)
 
--- Function that runs when the tool is equipped
+local AnimAnim2 = Instance.new("Animation")
+AnimAnim2.AnimationId = "rbxassetid://132259592388175" -- Second Animation (Middle)
+
+local AnimAnim3 = Instance.new("Animation")
+AnimAnim3.AnimationId = "rbxassetid://95575238948327" -- Third Animation (Looped Run)
+
+local AnimAnim4 = Instance.new("Animation")
+AnimAnim4.AnimationId = "rbxassetid://102814369422840" -- Exit Animation
+
+-- Equip
 tool.Equipped:Connect(function()
-    
-    -- Perform the one-time action
-    if not oneTimeExecuted then
-        oneTimeExecuted = true
+	if oneTimeExecuted then return end
+	oneTimeExecuted = true
+	running = true
 
-        local soundId = "rbxassetid://129080118003311"
-        local sound = Instance.new("Sound", game.workspace)
-        sound.SoundId = soundId
-        sound:Play()
+	print("Tool Equipped - Running!")
 
-        local soundId2 = "rbxassetid://17429233290"
-        local sound2 = Instance.new("Sound", game.workspace)
-        sound2.SoundId = soundId2
-
-		local soundId3 = "rbxassetid://136509670232806"
-        local sound3 = Instance.new("Sound", game.workspace)
-		sound3.Name = "Run"
-		sound3.Looped = true
-        sound3.SoundId = soundId3
-
+	-- === Add Accoutrement immediately ===
+	local existingFreeze = character:FindFirstChild("Freeze")
+	if not existingFreeze then
 		local Accou = Instance.new("Accoutrement")
-
-		Accou.Parent = player.character
-
 		Accou.Name = "Freeze"
+		Accou.Parent = character
+	end
 
-        local AnimAnim = Instance.new("Animation")
-		local AnimAnim2 = Instance.new("Animation")
-		local AnimAnim3 = Instance.new("Animation")
+	-- === SOUNDS ===
+	local hrp = HumanoidRootPart
 
-		AnimAnim.AnimationId = "rbxassetid://106755459092436"
-        AnimAnim2.AnimationId = "rbxassetid://132259592388175"
-        AnimAnim3.AnimationId = "rbxassetid://95575238948327"
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://129080118003311" -- Starting sound
+	sound.Volume = 0.5
+	sound.Parent = hrp
+	sound:Play()
 
-        local Anim = Humanoid:LoadAnimation(AnimAnim)
-        local Anim2 = Humanoid:LoadAnimation(AnimAnim2)
-        local Anim3 = Humanoid:LoadAnimation(AnimAnim3)
+	local sound2 = Instance.new("Sound")
+	sound2.SoundId = "rbxassetid://17429233290" -- Mid sound
+	sound2.Volume = 0.5
+	sound2.Parent = hrp
 
-		local startTime = 0
+	local sound3 = Instance.new("Sound")
+	sound3.SoundId = "rbxassetid://136509670232806" -- Running loop
+	sound3.Name = "Run"
+	sound3.Looped = true
+	sound3.Volume = 0.5
+	sound3.Parent = hrp
 
+	-- === ANIMATIONS ===
+	local Anim = Humanoid:LoadAnimation(AnimAnim)
+	local Anim2 = Humanoid:LoadAnimation(AnimAnim2)
+	local Anim3 = Humanoid:LoadAnimation(AnimAnim3)
 
-		Anim:Play()
-		task.wait(Anim.Length)
-        Anim2:Play()
-        sound:Destroy()
-        sound2:Play()
-		sound2.TimePosition = 1.75
-		running = true
-		task.delay(Anim2.Length, function()
-        Anim3:Play()
+	Anim:Play() -- Startup anim
+	task.wait(Anim.Length)
+
+	Anim2:Play() -- Middle anim
+	sound:Destroy()
+	sound2:Play()
+	sound2.TimePosition = 1.75
+
+	-- Delay and then play looping running animation and running sound
+	task.delay(Anim2.Length, function()
+		Anim3:Play()
 		Anim3:AdjustSpeed(1.15)
 	end)
-		task.delay(0.75, function()
+
+	task.delay(0.75, function()
 		sound2:Destroy()
 		sound3:Play()
 	end)
-end
-    
-    -- Continuous execution while the tool is equipped
-    while running do
-	task.wait(0.01)
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-local speed = 225 -- studs per second
-local duration = 0.01
+	-- === MOVEMENT ===
+	currentSpeed = 0 -- Reset speed
 
-local elapsedTime = 0
-local RunService = game:GetService("RunService")
+	connection = RunService.Heartbeat:Connect(function(deltaTime)
+		if not running then return end
 
-local connection
-connection = RunService.Heartbeat:Connect(function(deltaTime)
-    -- Move the HumanoidRootPart forward at a consistent rate
-    local moveDirection = HumanoidRootPart.CFrame.LookVector
-    HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + moveDirection * speed * deltaTime
-    
-    elapsedTime += deltaTime
-    if elapsedTime >= duration then
-        connection:Disconnect() -- Stop after the duration
-    end
+		-- Accelerate towards target speed
+		if currentSpeed < targetSpeed then
+			currentSpeed = math.min(currentSpeed + acceleration, targetSpeed)
+		end
+
+		-- Move forward
+		local forwardDirection = HumanoidRootPart.CFrame.LookVector
+		local currentVelocity = HumanoidRootPart.Velocity
+		HumanoidRootPart.Velocity = Vector3.new(
+			forwardDirection.X * currentSpeed,
+			currentVelocity.Y,
+			forwardDirection.Z * currentSpeed
+		)
+	end)
 end)
 
-
-    end
-end)
-
+-- Unequipped
 tool.Unequipped:Connect(function()
-    local player = game.Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
-    local HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
+	print("Tool Unequipped - Slowing down...")
 
-    sound3 = workspace:FindFirstChild("Run")
-    if sound3 then
-        sound3:Destroy()
-    end
+	running = false
+	oneTimeExecuted = false
 
-    Accou = character:FindFirstChild("Freeze")
-    
-    local Humanoid = character:FindFirstChild("Humanoid")
-    
-    local AnimAnim3 = Instance.new("Animation")
-    AnimAnim3.AnimationId = "rbxassetid://95575238948327"
-    local Anim3 = Humanoid:LoadAnimation(AnimAnim3)
-    
-    local AnimAnim4 = Instance.new("Animation")
-    AnimAnim4.AnimationId = "rbxassetid://102814369422840"
-    local Anim4 = Humanoid:LoadAnimation(AnimAnim4)
+	-- Disconnect movement loop
+	if connection then
+		connection:Disconnect()
+		connection = nil
+	end
 
-    -- Stop all animations
-    for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
-        animTrack:Stop()
-    end
+	-- Stop running sound if it exists
+	local runSound = HumanoidRootPart:FindFirstChild("Run")
+	if runSound then
+		runSound:Destroy()
+	end
 
-    running = false
-    oneTimeExecuted = false
+	-- Stop all animations currently playing
+	for _, animTrack in ipairs(Humanoid:GetPlayingAnimationTracks()) do
+		animTrack:Stop()
+	end
 
-    local soundId4 = "rbxassetid://134792238229461"
-    local sound4 = Instance.new("Sound", game.workspace)
-    sound4.SoundId = soundId4
-    sound4.Looped = false
-    sound4:Play()
-    
-    Anim4:Play()
+	-- === Play Exit Animation ===
+	local Anim4 = Humanoid:LoadAnimation(AnimAnim4)
+	Anim4:Play()
 
-    -- **Smoothly decrease speed to 0**
-    local speed = 225
-    while speed > 0 do
-        speed = speed - 4.5 -- Reduce speed gradually
-        HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + HumanoidRootPart.CFrame.LookVector * speed * 0.01
-        task.wait(0.001) -- Adjust wait time for a smooth effect
-    end
+	-- === Play stopping sound ===
+	local stopSound = Instance.new("Sound")
+	stopSound.SoundId = "rbxassetid://134792238229461" -- Stop sound
+	stopSound.Volume = 0.5
+	stopSound.Parent = HumanoidRootPart
+	stopSound:Play()
 
-    task.delay(0.1, function()
-        if Accou then Accou:Destroy() end
-    end)
+	-- === Smooth slow down ===
+	task.spawn(function()
+		while currentSpeed > 0 do
+			currentSpeed = math.max(currentSpeed - deceleration, 0)
 
-    task.delay(3.5, function()
-        sound4:Destroy()
-    end)
+			local forwardDirection = HumanoidRootPart.CFrame.LookVector
+			local currentVelocity = HumanoidRootPart.Velocity
+			HumanoidRootPart.Velocity = Vector3.new(
+				forwardDirection.X * currentSpeed,
+				currentVelocity.Y,
+				forwardDirection.Z * currentSpeed
+			)
+
+			task.wait(0.03) -- Smoothness
+		end
+
+		print("Stopped moving completely.")
+
+		-- Cleanup accoutrement if it exists
+		local Accou = character:FindFirstChild("Freeze")
+		if Accou then
+			Accou:Destroy()
+		end
+
+		-- Destroy the stop sound after 3.5 seconds
+		task.delay(3.5, function()
+			stopSound:Destroy()
+		end)
+	end)
 end)
 
 local FO = true
 
 
--- Services
 local Players = game:GetService("Players")
+local ContentProvider = game:GetService("ContentProvider")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Creating the tool
+local preloadSounds = {}
+
+local preloadSound = Instance.new("Sound")
+preloadSound.SoundId = "rbxassetid://95410275491981"
+preloadSound.Parent = ReplicatedStorage
+table.insert(preloadSounds, preloadSound)
+
+local preloadSound2 = Instance.new("Sound")
+preloadSound2.SoundId = "rbxassetid://128136381213631"
+preloadSound2.Parent = ReplicatedStorage
+table.insert(preloadSounds, preloadSound2)
+
+local preloadSound3 = Instance.new("Sound")
+preloadSound3.SoundId = "rbxassetid://99126314241685"
+preloadSound3.Parent = ReplicatedStorage
+table.insert(preloadSounds, preloadSound3)
+
+-- Preload
+ContentProvider:PreloadAsync(preloadSounds)
+
 local tool = Instance.new("Tool")
 tool.Name = "Unlimited Flex Works"
 tool.RequiresHandle = false
 tool:SetAttribute("Skill", true)
 tool:SetAttribute("KJUlt", true)
 
--- Adding the tool to the player's backpack
 tool.Parent = Players.LocalPlayer.Backpack
 
--- Function that runs when the tool is equipped
 tool.Equipped:Connect(function()
-    local player = game.Players.LocalPlayer
+    local player = Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local humanoid = character:WaitForChild("Humanoid")
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-	local talk = false
-	
-	if talk == true then
-    -- Chat messages
-    game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("Because...", "All")
-    task.delay(1.4, function()
-        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("With this,", "All")
-    end)
-    task.delay(2.3, function()
-        game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer("IT'S OVER!", "All")
-    end)
-end
 
-    -- Preserve original WalkSpeed, JumpPower, and position/rotation
-    local originalPosition = humanoidRootPart.Position
-    local originalCFrame = humanoidRootPart.CFrame
-
-    -- Add a platform to teleport the player
-    local part = Instance.new("Part", workspace)
-    part.Position = Vector3.new(-100, -5, 0)
-    part.Anchored = true
-    part.Size = Vector3.new(10, 1, 10)
-    part.Transparency = 1
-
-    local player = game.Players.LocalPlayer
-
-    local character = player.Character or player.CharacterAdded:Wait()
-
-    local p = game.Players.LocalPlayer
-
-    local humanoid = p.Character:WaitForChild("Humanoid")
-
-	-- Add the Accoutrement to the player's character
     local thing = Instance.new("Accoutrement")
     thing.Name = "Freeze"
-    thing.Parent = character -- Attach to the player's character
+    thing.Parent = character
 
-    local thing2 = Instance.new("Accoutrement")
-    thing2.Name = "NoRotate"
-    thing2.Parent = character
-	
-    local thing3 = Instance.new("Accoutrement")
-    thing3.Name = "usingufw"
-    thing3.Parent = character	
-
-    -- Play animation
-	local AnimAnim = Instance.new("Animation")
-	AnimAnim.AnimationId = "rbxassetid://77727115892579"
-	local Anim = humanoid:LoadAnimation(AnimAnim)
-    Anim:Play()
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
-
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local head = character:WaitForChild("Head") -- Target the player's head
-
--- Easing function for smoother motion (ease in and out)
-local function easeInOutQuad(t)
-    return t < 0.5 and 2 * t * t or 1 - (-2 * t + 2)^2 / 2
-end
-
--- Function to smoothly move the camera and adjust FOV
-local function cinematicZoomEffect()
-    -- Set the camera to Scriptable mode for manual control
-    Camera.CameraType = Enum.CameraType.Scriptable
-
-    -- Define positions for the sequence
-    local headPosition = head.Position
-    local lookVector = head.CFrame.LookVector
-    local offsetHeight = -0.1 -- Keep the camera at head height
-    local closeDistance = 3 -- Start 3 studs in front of the player
-    local farDistance = 15 -- Move 15 studs away
-
-    -- Define camera positions (Add LookVector to position the camera in front)
-    local closePosition = headPosition + (lookVector * closeDistance) + Vector3.new(0, offsetHeight, 0)
-    local farPosition = headPosition + (lookVector * farDistance) + Vector3.new(0, offsetHeight, 0)
-    local finalPosition = headPosition + (lookVector * 5) + Vector3.new(0, offsetHeight, 0) -- End 5 studs in front
-
-    -- Define FOV values for the sequence
-    local closeFOV = 40 -- Tight zoom
-    local farFOV = 60 -- Wide zoom
-    local finalFOV = 90 -- Return to default zoom
-
-    -- Timing for each phase
-    local zoomOutDuration = 0.5 -- Time to zoom out
-    local pauseDuration = 0.01 -- Pause at the far position
-    local zoomInDuration = 2.5 -- Time to zoom back in
-
-    -- Function to interpolate between two values with easing
-    local function interpolate(startValue, endValue, alpha)
-        return startValue + (endValue - startValue) * easeInOutQuad(alpha)
-    end
-
-    -- Animate the camera
-    local function animateCamera(startPosition, endPosition, startFOV, endFOV, duration, onComplete)
-        local startTime = tick()
-        local connection
-        FO = false
-
-        connection = RunService.RenderStepped:Connect(function()
-            local elapsed = tick() - startTime
-            local alpha = math.min(elapsed / duration, 1) -- Progress from 0 to 1
-
-            -- Easing interpolation for position and FOV
-            local currentPosition = startPosition:Lerp(endPosition, easeInOutQuad(alpha))
-            local currentFOV = interpolate(startFOV, endFOV, alpha)
-
-            -- Update the camera's position and FOV
-            Camera.CFrame = CFrame.new(currentPosition, headPosition) -- Look at the head
-            Camera.FieldOfView = currentFOV
-
-            if alpha == 1 then
-                -- Animation complete
-                connection:Disconnect()
-                if onComplete then
-                    onComplete()
-                end
-            end
-        end)
-    end
-
-    -- Sequence: Zoom out, pause, then zoom back in
-    animateCamera(closePosition, farPosition, closeFOV, farFOV, zoomOutDuration, function()
-        -- Pause at the far position
-        task.delay(pauseDuration, function()
-            -- Zoom back in
-            animateCamera(farPosition, finalPosition, farFOV, finalFOV, zoomInDuration, function()
-                -- Reset camera to default
-                task.delay(0.2, function()
-                    Camera.CameraType = Enum.CameraType.Custom
-                end)
-            end)
-        end)
+    task.delay(12, function()
+        thing:Destroy()
     end)
-end
 
--- Trigger the cinematic zoom effect
-cinematicZoomEffect()
+    local sound
 
-    -- Sounds
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = "rbxassetid://95410275491981"
+    sound = preloadSound:Clone()
+    sound.Parent = workspace
     sound.Volume = 1.5
+    sound.TimePosition = 20.5
     sound:Play()
 
-    local sound2 = Instance.new("Sound", workspace)
-    sound2.SoundId = "rbxassetid://128136381213631"
-    sound2.Volume = 1.5
-    sound2:Play()
+    -- March Anim
+    local AnimAnim = Instance.new("Animation")
+    AnimAnim.AnimationId = "rbxassetid://15962443652"
+    local Anim = humanoid:LoadAnimation(AnimAnim)
+    Anim:Play()
 
-    local sound3 = Instance.new("Sound", workspace)
-    sound3.SoundId = "rbxassetid://99126314241685"
-    sound3.Volume = 1.25
-    sound3:Play()
-
-    -- Background setup
-    local Back = game.ReplicatedStorage.Resources.UFW.BG
-    local BackC = Back:Clone()
-    BackC.Parent = workspace
-    BackC:MoveTo(Vector3.new(-100, 0, 0))
-    BackC:SetPrimaryPartCFrame(CFrame.new(-100, 0, 0))
-    BackC.Floor2.CanCollide = true
-
-	-- Stars (Clap 2)
-	local Stars = game.ReplicatedStorage.Resources.UFW.vfx.UFWSkyroom
-	local StarsC = Stars:Clone()
-
-    -- Animation sequence and teleport
-    task.delay(3.1, function()
-        originalPosition = humanoidRootPart.Position
-        originalCFrame = humanoidRootPart.CFrame
-    end)
-task.delay(3.2, function()
-    humanoidRootPart.CFrame = CFrame.new(Vector3.new(-100, 0, 0)) -- Move to specific position
-    humanoidRootPart.CFrame = CFrame.new(Vector3.new(-100, 0, 0)) * CFrame.Angles(0, math.rad(90), 0) -- Rotate it
-end)
-task.delay(5, function()
-	BackC.Floor.Transparency = 0.5
-	BackC.Wall2.Transparency = 0.8
-end)
-
-    local duration = 25.8 - 2.85
+    -- Move script
+    local moveTime = 2
     local startTime = tick()
-    while tick() - startTime < duration do
-        task.wait(0.01)
-    end
 
-    -- Cleanup and restore player
-    humanoidRootPart.CFrame = originalCFrame
-    task.wait(2.85)
+    local connection
+    connection = game:GetService("RunService").Heartbeat:Connect(function()
+        if tick() - startTime >= moveTime then
+            connection:Disconnect()
+            return
+        end
 
-    local sound4 = Instance.new("Sound", workspace)
-    sound4.SoundId = "rbxassetid://118747531933793"
-    sound4.Volume = 2.5
-    sound4:Play()
-    FO = true
+        local currentVelocity = humanoidRootPart.Velocity
+        local forwardDirection = humanoidRootPart.CFrame.LookVector * 15
+        humanoidRootPart.Velocity = Vector3.new(forwardDirection.X, currentVelocity.Y, forwardDirection.Z)
+    end)
 
-    thing:Destroy()
-	thing2:Destroy()
-	thing3:Destroy()
-    BackC:Destroy()
+    task.wait(2)
 
-    -- Final cleanup
-    task.wait(17.5)
-    part:Destroy()
-    sound:Destroy()
-    sound2:Destroy()
-    sound3:Destroy()
-    sound4:Destroy()
+    -- Second animation
+    local AnimAnim2 = Instance.new("Animation")
+    AnimAnim2.AnimationId = "rbxassetid://77727115892579"
+    local Anim2 = humanoid:LoadAnimation(AnimAnim2)
+
+    Anim:Stop()
+    Anim2:Play()
+
+    local sound2
+
+    sound2 = preloadSound2:Clone()
+    sound2.Parent = workspace
+    sound2.Volume = 1.5
+    task.wait(0.3)
+    sound2.TimePosition = 0.15
+    sound2:Play()
+    Anim2:AdjustSpeed(0.9)
+
+    task.delay(1, function()
+        Anim2:AdjustSpeed(0.54)
+        Anim2.TimePosition = 2.35
+        task.wait(1.3)
+        Anim2:AdjustSpeed(0.9)
+    end)
+
+    local sound3
+
+    task.delay(1.45, function()
+        sound3 = preloadSound3:Clone()
+        sound3.Parent = workspace
+        sound3.Volume = 1.5
+        sound3.TimePosition = 2.5
+        sound3.Name = "SFX"
+        sound3:Play()
+
+        task.wait(1)
+
+        Anim2.TimePosition = 6
+        Anim2:AdjustSpeed(1)
+
+        task.delay(1, function()
+            sound3.TimePosition = 7.225
+        end)
+
+        task.delay(3, function()
+            Anim2:AdjustSpeed(3)
+            task.wait(0.33)
+            Anim2:AdjustSpeed(1.25)
+            sound3.TimePosition = 10.25
+        end)
+
+        task.delay(4.3, function()
+            Anim2.TimePosition = 25
+            sound3.TimePosition = 12.25
+        end)
+
+        task.delay(6.525, function()
+            sound3:Destroy()
+        end)
+    end)
+
+    task.delay(1.5, function()
+        sound2:Destroy()
+    end)
+
+    task.delay(20, function()
+        sound:Destroy()
+    end)
 end)
+
 
 playerGui.DescendantAdded:Connect(findGuiAndSetText)
 
@@ -718,9 +655,13 @@ local startTime = 0
 
 Anim:Play()
 
-local snd = Instance.new("Sound", game.workspace)
+local hrp = player.character:WaitForChild("HumanoidRootPart")
+
+local snd = Instance.new("Sound")
 local sndId = "rbxassetid://16945495411"
 snd.SoundId = sndId
+snd.Parent = hrp
+snd.Volume = 0.5
 
 snd:Play()
 
@@ -1094,11 +1035,15 @@ Anim:Play()
 
 Anim:AdjustSpeed(0)
 
+local hrp = player.character:WaitForChild("HumanoidRootPart")
+
 Anim.TimePosition = startTime
 
 local soundId = "rbxassetid://72864971245980"
-local sound = Instance.new("Sound",game.Workspace)
+local sound = Instance.new("Sound")
 sound.SoundId = soundId
+sound.Parent = hrp
+sound.Volume = 1.25
 
 task.delay(4, function()
 	sound:Destroy()
